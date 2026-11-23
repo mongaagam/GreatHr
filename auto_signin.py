@@ -24,6 +24,15 @@ def load_env_file():
             key, value = line.split("=", 1)
             os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
+def is_holiday():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "holidays.txt")
+    if not os.path.exists(path):
+        return False
+    today = datetime.now().strftime("%Y-%m-%d")
+    for line in open(path):
+        if line.split("#")[0].strip() == today:
+            return True
+    return False
 
 def need(name):
     value = os.environ.get(name)
@@ -45,7 +54,12 @@ SIGNOUT_BTN = re.compile(r"^\s*sign\s*out\s*$", re.I)
 def log(msg):
     print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] {msg}", flush=True)
 
-
+def punch(action):
+    """Returns 'clicked', 'skipped' or raises on failure."""
+    if is_holiday():
+        log("Holiday/leave - nothing to do.")
+        return "skipped"
+    
 def punch(action):
     """Returns 'clicked', 'skipped' or raises on failure."""
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
